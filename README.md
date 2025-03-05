@@ -1,5 +1,7 @@
 ﻿## Magic newton
  
+Register Here: https://magicnewton.com/portal?referral=gr07kig367267mw7
+ 
 ## 🚨 Attention Before Running Magic Cli Version
 
 ## Magic Node cli version Script features
