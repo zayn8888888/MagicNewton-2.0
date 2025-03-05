@@ -30,9 +30,7 @@ npm install
 nano .env
 ```
 
-- Setup input value
-
-* proxy (optional): http://user:pass@ip:port
+## Proxy (optional): http://user:pass@ip:port
 
 ```bash
 nano proxy.txt
