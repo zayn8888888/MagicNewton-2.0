@@ -8,7 +8,7 @@ Register Here: https://magicnewton.com/portal?referral=gr07kig367267mw7
 
 - Auto roll
 - Auto social quest
-- Support proxy or not
+- Support proxy / no proxy
 - Mutiple threads, multiple accounts
 
 ## RUNNING
