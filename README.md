@@ -40,7 +40,7 @@ nano proxy.txt
 - Open ``https://www.magicnewton.com/portal/rewards`` in your browser and login
 - Press F12 or open developer option and then follow this screenshot
 ![image](1741192300599.jpg)
-- Insert your account details in ``accounts.txt``,
+- Insert your account details in ``data.txt``,
 
 ```bash
 nano data.txt
