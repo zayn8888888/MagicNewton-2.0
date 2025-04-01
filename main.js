@@ -6,8 +6,22 @@ const { HttpsProxyAgent } = require("https-proxy-agent");
 const readline = require("readline");
 const user_agents = require("./config/userAgents");
 const settings = require("./config/config");
-const { sleep, loadData, getRandomNumber, saveToken, isTokenExpired, saveJson, updateEnv, decodeJWT } = require("./utils");
-const { Worker, isMainThread, parentPort, workerData } = require("worker_threads");
+const {
+  sleep,
+  loadData,
+  getRandomNumber,
+  saveToken,
+  isTokenExpired,
+  saveJson,
+  updateEnv,
+  decodeJWT,
+} = require("./utils");
+const {
+  Worker,
+  isMainThread,
+  parentPort,
+  workerData,
+} = require("worker_threads");
 const { checkBaseUrl } = require("./checkAPI");
 const headers = require("./core/header");
 const { DateTime } = require("luxon");
@@ -48,7 +62,9 @@ class ClientAPI {
     if (this.session_user_agents[this.session_name]) {
       return this.session_user_agents[this.session_name];
     }
-console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
+    console.log(
+      `[Account ${this.accountIndex + 1}] Creating user agent...`.blue
+    );
     const newUserAgent = this.#get_random_user_agent();
     this.session_user_agents[this.session_name] = newUserAgent;
     this.#save_session_data(this.session_user_agents);
@@ -78,7 +94,9 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
 
   #set_headers() {
     const platform = this.#get_platform(this.#get_user_agent());
-    this.headers["sec-ch-ua"] = `Not)A;Brand";v="99", "${platform} WebView";v="127", "Chromium";v="127`;
+    this.headers[
+      "sec-ch-ua"
+    ] = `Not)A;Brand";v="99", "${platform} WebView";v="127", "Chromium";v="127`;
     this.headers["sec-ch-ua-platform"] = platform;
     this.headers["User-Agent"] = this.#get_user_agent();
   }
@@ -88,7 +106,10 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
       this.session_name = this.accountIndex;
       this.#get_user_agent();
     } catch (error) {
-      this.log(`Can't create user agent, try get new query_id: ${error.message}`, "error");
+      this.log(
+        `Can't create user agent, try get new query_id: ${error.message}`,
+        "error"
+      );
       return;
     }
   }
@@ -123,12 +144,16 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
   async checkProxyIP() {
     try {
       const proxyAgent = new HttpsProxyAgent(this.proxy);
-      const response = await axios.get("https://api.ipify.org?format=json", { httpsAgent: proxyAgent });
+      const response = await axios.get("https://api.ipify.org?format=json", {
+        httpsAgent: proxyAgent,
+      });
       if (response.status === 200) {
         this.proxyIP = response.data.ip;
         return response.data.ip;
       } else {
-        throw new Error(`Cannot check proxy IP. Status code: ${response.status}`);
+        throw new Error(
+          `Cannot check proxy IP. Status code: ${response.status}`
+        );
       }
     } catch (error) {
       throw new Error(`Error checking proxy IP: ${error.message}`);
@@ -171,17 +196,29 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
           timeout: 30000,
         });
         success = true;
-        if (response?.data?.data) return { success: true, data: response.data.data };
+        if (response?.data?.data)
+          return { success: true, data: response.data.data };
         return { success: true, data: response.data };
       } catch (error) {
         if (error.status == 400) {
           // this.log(`Invalid request for ${url}, maybe have new update from server | contact: https://t.me/D4rkCipherX to get new update!`, "error");
-          return { success: false, status: error.status, error: error.response.data.error || error.response.data.message || error.message };
+          return {
+            success: false,
+            status: error.status,
+            error:
+              error.response.data.error ||
+              error.response.data.message ||
+              error.message,
+          };
         }
-        this.log(`Request failed: ${url} | ${error.message} | retrying...`, "warning");
+        this.log(
+          `Request failed: ${url} | ${error.message} | retrying...`,
+          "warning"
+        );
         success = false;
         await sleep(settings.DELAY_BETWEEN_REQUESTS);
-        if (currRetries == retries) return { success: false, error: error.message };
+        if (currRetries == retries)
+          return { success: false, error: error.message };
       }
       currRetries++;
     } while (currRetries <= retries && !success);
@@ -211,7 +248,9 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
         return null;
       }
 
-      const diceRollQuest = questsResult.data.find((quest) => quest.title === "Daily Dice Roll");
+      const diceRollQuest = questsResult.data.find(
+        (quest) => quest.title === "Daily Dice Roll"
+      );
       if (!diceRollQuest) {
         this.log("Daily Dice Roll quest not found", "warning");
         return null;
@@ -237,7 +276,9 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
         return false;
       }
 
-      const diceRollQuest = userQuestsResult.data.find((quest) => quest.questId === diceRollId);
+      const diceRollQuest = userQuestsResult.data.find(
+        (quest) => quest.questId === diceRollId
+      );
 
       if (!diceRollQuest) {
         return true;
@@ -249,13 +290,19 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
 
       if (hoursDiff < 24) {
         const remainingHours = Math.ceil(24 - hoursDiff);
-        this.log(`Not yet Roll Dice time, time remaining ${remainingHours} hour`, "warning");
+        this.log(
+          `Not yet Roll Dice time, time remaining ${remainingHours} hour`,
+          "warning"
+        );
         return false;
       }
 
       return true;
     } catch (error) {
-      this.log(`Error checking dice roll availability: ${error.message}`, "warning");
+      this.log(
+        `Error checking dice roll availability: ${error.message}`,
+        "warning"
+      );
       return false;
     }
   }
@@ -263,32 +310,51 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
   async performDiceRoll(diceRollId) {
     const payload = {
       questId: diceRollId,
-      metadata: {
-        action: "ROLL",
-      },
+      metadata: {},
     };
 
     try {
       const userQuestsResult = await this.getUserQuests();
       if (userQuestsResult.success) {
-        const completedQuests = userQuestsResult.data.filter((quest) => quest.questId === diceRollId && quest.status === "COMPLETED");
+        const completedQuests = userQuestsResult.data.filter(
+          (quest) =>
+            quest.questId === diceRollId && quest.status === "COMPLETED"
+        );
 
         if (completedQuests.length > 0) {
-          const mostRecentQuest = completedQuests.sort((a, b) => DateTime.fromISO(b.updatedAt).toMillis() - DateTime.fromISO(a.updatedAt).toMillis())[0];
+          const mostRecentQuest = completedQuests.sort(
+            (a, b) =>
+              DateTime.fromISO(b.updatedAt).toMillis() -
+              DateTime.fromISO(a.updatedAt).toMillis()
+          )[0];
 
-          const lastUpdateTime = DateTime.fromISO(mostRecentQuest.updatedAt).setZone("local");
+          const lastUpdateTime = DateTime.fromISO(
+            mostRecentQuest.updatedAt
+          ).setZone("local");
           const currentTime = DateTime.now().setZone("local");
           const hoursDiff = currentTime.diff(lastUpdateTime, "hours").hours;
 
           if (hoursDiff >= 24) {
-            this.log(`Over 24 hours since last roll, proceed to new roll...`, "info");
+            this.log(
+              `Over 24 hours since last roll, proceed to new roll...`,
+              "info"
+            );
           } else {
             const nextRollTime = lastUpdateTime.plus({ hours: 24 });
-            this.log(`Quest completed before, credits received: ${mostRecentQuest.credits}`, "warning");
+            this.log(
+              `Quest completed before, credits received: ${mostRecentQuest.credits}`,
+              "warning"
+            );
             if (mostRecentQuest._diceRolls) {
-              this.log(`Previous rolls: [${mostRecentQuest._diceRolls.join(", ")}]`, "custom");
+              this.log(
+                `Previous rolls: [${mostRecentQuest._diceRolls.join(", ")}]`,
+                "custom"
+              );
             }
-            this.log(`Next roll time: ${nextRollTime.toFormat("dd/MM/yyyy HH:mm:ss")}`, "info");
+            this.log(
+              `Next roll time: ${nextRollTime.toFormat("dd/MM/yyyy HH:mm:ss")}`,
+              "info"
+            );
             return true;
           }
         }
@@ -315,35 +381,73 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
           if (status === "COMPLETED") {
             isCompleted = true;
             const serverTime = DateTime.fromISO(updatedAt);
-            const localNextRollTime = serverTime.plus({ hours: 24 }).setZone("local");
+            const localNextRollTime = serverTime
+              .plus({ hours: 24 })
+              .setZone("local");
 
-            this.log(`Roll dice completed | Reward: ${totalCredits} credits | Next roll time: ${localNextRollTime.toFormat("dd/MM/yyyy HH:mm:ss")}`, "success");
+            this.log(
+              `Roll dice completed | Reward: ${totalCredits} credits | Next roll time: ${localNextRollTime.toFormat(
+                "dd/MM/yyyy HH:mm:ss"
+              )}`,
+              "success"
+            );
           } else if (status === "PENDING") {
             await new Promise((resolve) => setTimeout(resolve, 1000));
           }
         } else {
-          if (response?.status == 400 && response?.error == "Quest already completed") {
+          if (
+            response?.status == 400 &&
+            response?.error == "Quest already completed"
+          ) {
             const userQuestsResult = await this.getUserQuests();
             if (userQuestsResult.success) {
-              const completedQuests = userQuestsResult.data.filter((quest) => quest.questId === diceRollId && quest.status === "COMPLETED");
+              const completedQuests = userQuestsResult.data.filter(
+                (quest) =>
+                  quest.questId === diceRollId && quest.status === "COMPLETED"
+              );
 
               if (completedQuests.length > 0) {
-                const mostRecentQuest = completedQuests.sort((a, b) => DateTime.fromISO(b.updatedAt).toMillis() - DateTime.fromISO(a.updatedAt).toMillis())[0];
+                const mostRecentQuest = completedQuests.sort(
+                  (a, b) =>
+                    DateTime.fromISO(b.updatedAt).toMillis() -
+                    DateTime.fromISO(a.updatedAt).toMillis()
+                )[0];
 
-                const lastUpdateTime = DateTime.fromISO(mostRecentQuest.updatedAt).setZone("local");
+                const lastUpdateTime = DateTime.fromISO(
+                  mostRecentQuest.updatedAt
+                ).setZone("local");
                 const currentTime = DateTime.now().setZone("local");
-                const hoursDiff = currentTime.diff(lastUpdateTime, "hours").hours;
+                const hoursDiff = currentTime.diff(
+                  lastUpdateTime,
+                  "hours"
+                ).hours;
 
                 if (hoursDiff >= 24) {
-                  this.log(`Over 24 hour since last roll, try roll again...`, "info");
+                  this.log(
+                    `Over 24 hour since last roll, try roll again...`,
+                    "info"
+                  );
                   return await this.performDiceRoll(diceRollId);
                 } else {
                   const nextRollTime = lastUpdateTime.plus({ hours: 24 });
-                  this.log(`Quest completed before, credits received: ${mostRecentQuest.credits}`, "warning");
+                  this.log(
+                    `Quest completed before, credits received: ${mostRecentQuest.credits}`,
+                    "warning"
+                  );
                   if (mostRecentQuest._diceRolls) {
-                    this.log(`Previous rolls: [${mostRecentQuest._diceRolls.join(", ")}]`, "custom");
+                    this.log(
+                      `Previous rolls: [${mostRecentQuest._diceRolls.join(
+                        ", "
+                      )}]`,
+                      "custom"
+                    );
                   }
-                  this.log(`Next roll time: ${nextRollTime.toFormat("dd/MM/yyyy HH:mm:ss")}`, "info");
+                  this.log(
+                    `Next roll time: ${nextRollTime.toFormat(
+                      "dd/MM/yyyy HH:mm:ss"
+                    )}`,
+                    "info"
+                  );
                   return true;
                 }
               }
@@ -368,14 +472,18 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
         return false;
       }
 
-      const diceRollQuest = userQuestsResult.data.find((quest) => quest.questId === diceRollId);
+      const diceRollQuest = userQuestsResult.data.find(
+        (quest) => quest.questId === diceRollId
+      );
 
       let shouldRoll = false;
 
       if (!diceRollQuest) {
         shouldRoll = true;
       } else {
-        const lastUpdateTime = DateTime.fromISO(diceRollQuest.updatedAt).setZone("local");
+        const lastUpdateTime = DateTime.fromISO(
+          diceRollQuest.updatedAt
+        ).setZone("local");
         const currentTime = DateTime.now().setZone("local");
         const hoursDiff = currentTime.diff(lastUpdateTime, "hours").hours;
 
@@ -384,7 +492,12 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
         } else {
           const remainingHours = Math.ceil(24 - hoursDiff);
           const nextRollTime = lastUpdateTime.plus({ hours: 24 });
-          this.log(`Not yet Roll Dice time, time remaining ${remainingHours} | ${nextRollTime.toFormat("dd/MM/yyyy HH:mm:ss")}`, "warning");
+          this.log(
+            `Not yet Roll Dice time, time remaining ${remainingHours} | ${nextRollTime.toFormat(
+              "dd/MM/yyyy HH:mm:ss"
+            )}`,
+            "warning"
+          );
         }
       }
 
@@ -394,7 +507,10 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
 
       return false;
     } catch (error) {
-      this.log(`Error checking and performing dice roll: ${error.message}`, "error");
+      this.log(
+        `Error checking and performing dice roll: ${error.message}`,
+        "error"
+      );
       return false;
     }
   }
@@ -413,9 +529,15 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
         return;
       }
 
-      const completedQuestIds = new Set(userQuestsResult.data.map((quest) => quest.questId));
+      const completedQuestIds = new Set(
+        userQuestsResult.data.map((quest) => quest.questId)
+      );
 
-      const socialQuests = questsResult.data.filter((quest) => quest.title.startsWith("Follow ") && quest.title !== "Follow Discord Server");
+      const socialQuests = questsResult.data.filter(
+        (quest) =>
+          quest.title.startsWith("Follow ") &&
+          quest.title !== "Follow Discord Server"
+      );
 
       for (const quest of socialQuests) {
         if (!completedQuestIds.has(quest.id)) {
@@ -438,7 +560,10 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
       const response = await this.action(payload);
       if (response.success) {
         const { credits } = response.data;
-        this.log(`Do the task ${platform} success, receive ${credits} Credits`, "success");
+        this.log(
+          `Do the task ${platform} success, receive ${credits} Credits`,
+          "success"
+        );
         return true;
       } else {
         if (response?.status === 400) {
@@ -460,7 +585,9 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
         return null;
       }
 
-      const completedQuests = userQuestsResult.data.filter((quest) => quest.questId === diceRollId && quest.status === "COMPLETED");
+      const completedQuests = userQuestsResult.data.filter(
+        (quest) => quest.questId === diceRollId && quest.status === "COMPLETED"
+      );
 
       if (completedQuests.length === 0) {
         return DateTime.now();
@@ -472,7 +599,9 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
         return currentTime > latestTime ? current : latest;
       });
 
-      const lastUpdateTime = DateTime.fromISO(latestQuest.updatedAt).setZone("local");
+      const lastUpdateTime = DateTime.fromISO(latestQuest.updatedAt).setZone(
+        "local"
+      );
       return lastUpdateTime.plus({ hours: 24 });
     } catch (error) {
       this.log(`Error getting next roll time: ${error.message}`, "error");
@@ -481,7 +610,9 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
   }
 
   calculateWaitTime(accountResults) {
-    const validResults = accountResults.filter((result) => result.success && result.nextRollTime !== null);
+    const validResults = accountResults.filter(
+      (result) => result.success && result.nextRollTime !== null
+    );
 
     if (validResults.length === 0) {
       return 24 * 60 * 60;
@@ -493,7 +624,9 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
       return current.nextRollTime > latest.nextRollTime ? current : latest;
     });
 
-    let waitSeconds = Math.ceil(latestResult.nextRollTime.diff(now, "seconds").seconds);
+    let waitSeconds = Math.ceil(
+      latestResult.nextRollTime.diff(now, "seconds").seconds
+    );
 
     waitSeconds += 5 * 60;
 
@@ -501,7 +634,10 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
       return 24 * 60 * 60;
     }
 
-    this.log(`Account with the longest wait time: ${latestResult.email}`, "info");
+    this.log(
+      `Account with the longest wait time: ${latestResult.email}`,
+      "info"
+    );
     return waitSeconds;
   }
 
@@ -516,8 +652,15 @@ console.log(`[Account ${this.accountIndex + 1}] Creating user agent...`.blue);
         this.log(`Cannot check proxy IP: ${error.message}`, "warning");
         return;
       }
-      const timesleep = getRandomNumber(settings.DELAY_START_BOT[0], settings.DELAY_START_BOT[1]);
-      console.log(`=========Account ${accountIndex + 1} | ${this.proxyIP} | Starts in ${timesleep} seconds...`.green);
+      const timesleep = getRandomNumber(
+        settings.DELAY_START_BOT[0],
+        settings.DELAY_START_BOT[1]
+      );
+      console.log(
+        `=========Account ${accountIndex + 1} | ${
+          this.proxyIP
+        } | Starts in ${timesleep} seconds...`.green
+      );
       await sleep(timesleep);
     }
 
@@ -556,7 +699,12 @@ async function runWorker(workerData) {
   const { queryId, accountIndex, proxy, hasIDAPI } = workerData;
   const to = new ClientAPI(queryId, accountIndex, proxy, hasIDAPI);
   try {
-    await Promise.race([to.runAccount(), new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 24 * 60 * 60 * 1000))]);
+    await Promise.race([
+      to.runAccount(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), 24 * 60 * 60 * 1000)
+      ),
+    ]);
     parentPort.postMessage({
       accountIndex,
     });
@@ -582,13 +730,17 @@ async function main() {
   if (!settings.USE_PROXY) {
     console.log(`You are running bot without proxies!!!`.yellow);
   }
-  let maxThreads = settings.USE_PROXY ? settings.MAX_THEADS : settings.MAX_THEADS_NO_PROXY;
+  let maxThreads = settings.USE_PROXY
+    ? settings.MAX_THEADS
+    : settings.MAX_THEADS_NO_PROXY;
 
   const { endpoint: hasIDAPI, message } = await checkBaseUrl();
   if (!hasIDAPI) return console.log(`API ID not found, try again later!`.red);
   console.log(`${message}`.yellow);
   // process.exit();
-  queryIds.map((val, i) => new ClientAPI(val, i, proxies[i], hasIDAPI).createUserAgent());
+  queryIds.map((val, i) =>
+    new ClientAPI(val, i, proxies[i], hasIDAPI).createUserAgent()
+  );
 
   await sleep(1);
   while (true) {
@@ -620,14 +772,18 @@ async function main() {
               resolve();
             });
             worker.on("error", (error) => {
-              console.log(`Worker error for account ${currentIndex}: ${error.message}`);
+              console.log(
+                `Worker error for account ${currentIndex}: ${error.message}`
+              );
               worker.terminate();
               resolve();
             });
             worker.on("exit", (code) => {
               worker.terminate();
               if (code !== 0) {
-                errors.push(`Worker for account ${currentIndex} exited with code: ${code}`);
+                errors.push(
+                  `Worker for account ${currentIndex} exited with code: ${code}`
+                );
               }
               resolve();
             });
@@ -650,7 +806,11 @@ async function main() {
 
     await sleep(3);
     console.log("Telegram channel (https://t.me/D4rkCipherX)".yellow);
-    console.log(`=============${new Date().toLocaleString()} | Complete all accounts | Wait ${settings.TIME_SLEEP} minutes=============`.magenta);
+    console.log(
+      `=============${new Date().toLocaleString()} | Complete all accounts | Wait ${
+        settings.TIME_SLEEP
+      } minutes=============`.magenta
+    );
     await sleep(settings.TIME_SLEEP * 60);
   }
 }
